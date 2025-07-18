@@ -71,3 +71,17 @@ Visit the app at:
 | `npm start`       | Builds and launches the app                      |
 | `npm run build`   | Builds server and client bundles via esbuild     |
 | `npm run clean`   | Deletes the `dist/` directory                    |
+
+---
+
+## 🔄 Caching Fetch Logic (Task 2 Summary)
+
+- `useCachingFetch` uses a shared in-memory cache to prevent redundant requests on the client
+- `preloadCachingFetch` hydrates the cache before render, enabling full SSR without JS
+- Cache is serialized and passed between server and client via `serializeCache` and `initializeCache`
+- Implementation ensures zero duplicate network requests and a smooth SSR/CSR transition
+
+### Known Limitations
+- In-memory cache resets on refresh or navigation (no persistence)
+- Not suitable for multi-user or multi-session scenarios without additional isolation
+
