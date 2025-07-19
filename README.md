@@ -1,10 +1,12 @@
 # People Directory Web Application
 
-A lightweight React application demonstrating server-side and client-side data loading using a custom framework. The app includes a mock API layer using MSW, a Fastify backend, and esbuild for bundling.
+This is a lightweight React-based web app that demonstrates both server-side and client-side rendering of data using a custom framework. The backend uses Fastify, while MSW (Mock Service Worker) mocks API responses for development without a real backend. It includes a caching layer to prevent redundant network calls and ensure smoother data access in both SSR and CSR scenarios.
 
 ---
 
-## Installation
+## Getting Started
+
+To install dependencies and run the app locally:
 
 ```bash
 npm install
@@ -14,19 +16,23 @@ npm start
 This will:
 - Clean the `dist` folder
 - Build the server and client using esbuild
-- Start the Fastify backend
+- Start the Fastify server
 
-Visit the app at:  
-👉 `http://localhost:3000` or `http://[::1]:3000`
+Once running, the app is accessible at:
+- http://localhost:3000
+- http://[::1]:3000
 
 ---
 
-## Features
+## App Routes
 
-- `/appWithSSRData` – Server-Side Rendered (SSR) people directory  
-- `/appWithoutSSRData` – Client-Side Rendered (CSR) people directory  
-- Mocked API responses using MSW (Mock Service Worker)  
-- Uses caching-fetch logic (to be implemented in Task 2)
+- `/appWithSSRData`  
+  Renders a list of people using server-side rendering. Data is fetched on the server and passed to the client without needing a browser-side fetch.
+
+- `/appWithoutSSRData`  
+  Renders the same list using client-side rendering. The browser fetches the data after the initial render.
+
+These pages demonstrate the same dataset rendered with different strategies, and both utilize a shared caching fetch mechanism.
 
 ---
 
@@ -34,54 +40,56 @@ Visit the app at:
 
 ```
 ├── framework/
-│   ├── server/         # Fastify backend entry
-│   └── mock-server/    # MSW worker file
-├── caching-fetch-library/  # Custom fetch logic to implement
-├── dist/               # Build output (gitignored)
-├── .idea/              # IDE settings (gitignored)
+│   ├── server/             # Fastify server and route handling
+│   ├── client/             # React entry point
+│   └── mock-server/        # MSW configuration
+├── caching-fetch-library/  # Custom caching fetch hook and SSR preload logic
+├── dist/                   # Compiled output (ignored in Git)
+├── .idea/                  # IDE settings (ignored in Git)
 └── README.md
 ```
 
 ---
 
-## Tooling Notes
+## Tooling and Dependencies
 
-- **esbuild** is used for fast, zero-config bundling  
-- **rimraf** replaces `rm -rf` for cross-platform compatibility  
-- `.gitignore` includes:
-  - `node_modules/`
-  - `dist/`
-  - `.idea/`
-
----
-
-## Known Issues & Next Steps
-
-- `useCachingFetch` and `preloadCachingFetch` are not yet implemented
-- Linting and formatting tools like ESLint and Prettier are not yet configured
-- Testing framework not included (recommend Vitest or Jest)
-- No CI/CD integration configured
+- **React 18** for UI rendering
+- **Fastify** as the backend framework
+- **MSW** to mock API responses
+- **esbuild** for ultra-fast builds
+- **rimraf** as a cross-platform alternative to `rm -rf`
+- `.gitignore` includes `node_modules`, `dist`, `.idea`
 
 ---
 
-## Scripts
+## Available Scripts
 
-| Script            | Description                                      |
-|-------------------|--------------------------------------------------|
-| `npm start`       | Builds and launches the app                      |
-| `npm run build`   | Builds server and client bundles via esbuild     |
-| `npm run clean`   | Deletes the `dist/` directory                    |
+```
+npm start       # Builds and launches the app
+npm run build   # Builds both server and client bundles
+npm run clean   # Deletes the dist/ directory
+```
 
 ---
 
-## 🔄 Caching Fetch Logic (Task 2 Summary)
+## Caching Fetch Overview
 
-- `useCachingFetch` uses a shared in-memory cache to prevent redundant requests on the client
-- `preloadCachingFetch` hydrates the cache before render, enabling full SSR without JS
-- Cache is serialized and passed between server and client via `serializeCache` and `initializeCache`
-- Implementation ensures zero duplicate network requests and a smooth SSR/CSR transition
+The app implements a simple shared in-memory cache to avoid redundant network requests. It includes:
 
-### Known Limitations
-- In-memory cache resets on refresh or navigation (no persistence)
-- Not suitable for multi-user or multi-session scenarios without additional isolation
+- `useCachingFetch(url)` — Fetches and caches data on the client
+- `preloadCachingFetch(url)` — Fetches and caches data on the server before rendering
+- `serializeCache()` — Converts the cache into a string for injecting into the client HTML
+- `initializeCache()` — Rehydrates the client cache using the serialized data from the server
+- `wipeCache()` — Clears the in-memory cache
+
+This ensures that:
+- On `/appWithSSRData`, no network request happens on the client after hydration
+- On `/appWithoutSSRData`, only one network request is made, no matter how many components consume the data
+
+---
+
+## Limitations
+
+- The in-memory cache is scoped to a single session and doesn't persist across page reloads. For production, a persistent layer (like localStorage or Redis) would be appropriate.
+- The SSR/CSR flow is designed for a single-user context. Multi-user session support could be added with proper session management.
 
